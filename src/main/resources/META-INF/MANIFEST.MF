@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Implementation-Title: jar
+Implementation-Version: 1.8.9
+TweakClass: org.spongepowered.asm.launch.MixinTweaker
+MixinConfigs: mixins.chatcopy.json
+FMLCorePluginContainsFMLMod: true
+ForceLoadAsMod: true

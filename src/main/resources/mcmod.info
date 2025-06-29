@@ -1,0 +1,14 @@
+[
+{
+  "modid": "chatcopy",
+  "name": "Chat Copy",
+  "description": "<3",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://miaw.ws",
+  "updateUrl": "",
+  "authorList": ["mia :3"],
+  "logoFile": "",
+  "screenshots": []
+}
+]

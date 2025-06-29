@@ -1,0 +1,114 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8' // fix encoding for §
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+// For those who want the bleeding edge
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven { url = 'https://plugins.gradle.org/m2/' }
+        mavenCentral()
+        maven { url = 'https://repo.spongepowered.org/maven' }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+version = "1.1"
+group= "ws.miaw.chatcopy" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "chatcopy"
+
+minecraft {
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+
+    // the mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   snapshot are built nightly.
+    // stable_#            stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not allways work.
+    // simply re-run your setup task after changing the mappings to update your workspace.
+    mappings = "stable_20"
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.spongepowered.org/maven' }
+    maven { url = 'https://plugins.gradle.org/m2/' }
+}
+
+configurations {
+    mixinShade {
+        transitive = false
+    }
+}
+
+dependencies {
+    compile 'org.spongepowered:mixin:0.7.11-SNAPSHOT'
+    mixinShade 'org.spongepowered:mixin:0.7.11-SNAPSHOT'
+}
+
+processResources
+        {
+            inputs.property "version", project.version
+            inputs.property "mcversion", project.minecraft.version
+
+            from(sourceSets.main.resources.srcDirs) {
+                include 'mcmod.info'
+
+                expand 'version':project.version, 'mcversion':project.minecraft.version
+            }
+
+            from(sourceSets.main.resources.srcDirs) {
+                exclude 'mcmod.info'
+            }
+        }
+
+shadowJar {
+    configurations = [project.configurations.mixinShade
+    ]
+    // i love conflicts
+    // (would need to depend on a relocated jar for this, which seems like effort)
+    // (and from testing, two jars without relocated sponge's seem fine)
+//    relocate 'org.spongepowered', 'ws.miaw.chatcopy.sponge'
+//    transform(ServiceFileTransformer)
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn shadowJar
+
+    // unpack the shaded JAR (but skip its manifest)
+    from({
+        zipTree(shadowJar.archivePath)
+    }) {
+        exclude 'META-INF/MANIFEST.MF'
+    }
+
+    // copy in mod metadata
+    from(sourceSets.main.resources.srcDirs) {
+        include 'META-INF/MANIFEST.MF'
+        include 'mcmod.info'
+    }
+
+    // need to do this to preserve manifest from IDE.
+    // Note: `ForceLoadAsMod: true` is required for MC to register the forge mod AND mixins
+    manifest {
+        from('src/main/resources/META-INF/MANIFEST.MF')
+    }
+
+    // exclude other stray META-INF stuff
+    exclude 'META-INF/*.kotlin_module'
+}
