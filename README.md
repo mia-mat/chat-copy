@@ -5,5 +5,8 @@ and a personal experience in learning mixins.
 
 I got annoyed with all the other mods with a chat copy having 2 billion other un-needed features so made this.
 
+
+<img src="https://i.imgur.com/1corPFs.jpeg" width="800" alt="demo"/>
+
 ## Dev Environment
 Forge 1.8.9 seems to dislike any version of IntelliJ above 2021.3, downgrading is recommended.
