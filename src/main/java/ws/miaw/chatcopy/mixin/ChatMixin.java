@@ -87,17 +87,31 @@ public class ChatMixin {
             int startY = mc.currentScreen.height - BOTTOM_BUFFER;
 
             if (DEBUG) System.out.println("raw mouseY = " + mouseY + ", correctedY = " + correctedY);
-            for (int i = 0; i < chatLines.size(); i++) {
+
+            // adjust for scroll position in chat
+
+            // field_146250_j -> getScrollPos
+            Field scrollField = GuiNewChat.class.getDeclaredField("field_146250_j");
+            scrollField.setAccessible(true);
+            int scroll = (int) scrollField.get(chatGUI);
+
+            int visibleLines = chatGUI.getLineCount(); // typically 10 by default (number of visible lines)
+
+            for (int i = 0; i < visibleLines && i + scroll < chatLines.size(); i++) {
+                int lineIndex = i + scroll;
+
                 int lineYTop = startY - (i + 1) * lineHeight;
                 int lineYBottom = lineYTop + lineHeight;
-                String text = chatLines.get(i).getChatComponent().getUnformattedText();
+
+                ChatLine line = chatLines.get(lineIndex);
+                String text = line.getChatComponent().getUnformattedText();
 
                 if (DEBUG)
-                    System.out.println("Line " + i + " spans Y[" + lineYTop + " … " + lineYBottom + ") → \"" + text + "\"");
+                    System.out.println("Line " + lineIndex + " spans Y[" + lineYTop + " … " + lineYBottom + ") → \"" + text + "\"");
 
                 if (correctedY >= lineYTop && correctedY < lineYBottom) {
                     if (DEBUG) System.out.println("   ^-- matched HERE");
-                    return chatLines.get(i).getChatComponent();
+                    return line.getChatComponent();
                 }
             }
             if (DEBUG) System.out.println("--- end debug, no match ---");

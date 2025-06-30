@@ -27,7 +27,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-version = "1.1"
+version = "1.1.1"
 group= "ws.miaw.chatcopy" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "chatcopy"
 
